@@ -44,7 +44,7 @@ namespace CodeWhite.Remoting.Shared
             return methodCall;
         }
 
-        public static IMethodReturnMessage CallRemoteToStringMethod(Uri url, IDictionary<string, object> logicalCallContextData = null)
+        public static IMethodReturnMessage CallRemoteToStringMethod(Uri url, IDictionary<string, object> logicalCallContextData = null, IDictionary<string, string> transportHeaders = null)
         {
             var transparentProxy = (MarshalByRefObject)RemotingServices.Connect(typeof(MarshalByRefObject), url.ToString());
 
@@ -60,7 +60,16 @@ namespace CodeWhite.Remoting.Shared
                     methodCall.LogicalCallContext.SetData(pair.Key, pair.Value);
                 }
             }
-            ;
+
+            // Add transport headers if provided
+            if (transportHeaders != null)
+            {
+                foreach (var header in transportHeaders)
+                {
+                    CallContext.SetData(header.Key, header.Value);
+                }
+            }
+
             return transparentProxy.CallMethod(methodCall);
         }
 
